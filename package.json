@@ -17,6 +17,7 @@
     "@tailwindcss/vite": "^4.1.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "ethers": "^6.14.1",
     "lucide-react": "^0.511.0",
     "magic-sdk": "^29.0.6",
     "react": "^19.1.0",
