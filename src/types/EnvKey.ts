@@ -1,0 +1,7 @@
+export type EnvKey =
+  | "VITE_MAGIC_PUBLIC_KEY"
+  | "VITE_MAGIC_SECRET_KEY"
+  | "VITE_CHAIN_ID"
+  | "VITE_NETWORK"
+  | "VITE_RPC_URL"
+  | "VITE_CONTRACT_ADDRESS";
