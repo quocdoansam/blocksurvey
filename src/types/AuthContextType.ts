@@ -1,7 +1,7 @@
-import type { UserRow } from "@/db/schema/users";
+import type { User } from "./User";
 
 export type AuthContextType = {
-  user: UserRow | null;
+  user: User | null;
   isLoading: boolean;
   fetchUser: () => Promise<void>;
   logout: () => Promise<void>;

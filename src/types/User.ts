@@ -1,7 +1,10 @@
-export type User = {
-  id: string;
+export interface User {
+  id?: string;
   name: string;
-  email: string;
-  avatarUrl: string;
-  walletAddress: string;
-};
+  email: string | null;
+  avatar_url: string | null;
+  public_address: string | null;
+  is_admin?: boolean;
+  login_provider: string;
+  created_at?: string;
+}

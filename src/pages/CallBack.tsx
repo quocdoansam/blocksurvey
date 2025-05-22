@@ -3,26 +3,26 @@ import { useNavigate } from "react-router-dom";
 import { magic } from "../lib/magic";
 import { Badge } from "lucide-react";
 import { syncUserToSupabase } from "@/services/supabase/userService";
+import type { User } from "@/types/User";
 import { generateAvatar } from "@/utils/Utils";
-import type { UserRow } from "@/db/schema/users";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Callback() {
   const navigate = useNavigate();
+  const { fetchUser } = useAuth();
 
-  const formatUserData = async (): Promise<UserRow> => {
+  const formatUserData = async (): Promise<User> => {
     const result = await magic.oauth2.getRedirectResult({});
     const userInfo = result.oauth.userInfo;
-    const metadata = await magic.user.getInfo();
-    const issuer = metadata.issuer;
+    const userMetadata = result.magic.userMetadata;
 
     return {
-      id: issuer ?? "",
-      name: userInfo.name ?? userInfo.email?.split("@")[0] ?? "Unknown",
-      email: userInfo.email ?? metadata.email ?? "",
+      name: userInfo.name || "Unknown",
+      email: userInfo.email || null,
       avatar_url:
-        userInfo.picture ??
-        generateAvatar(metadata.publicAddress ?? "default-avatar"),
-      public_address: metadata.publicAddress || "",
+        userInfo.picture || generateAvatar(userMetadata.publicAddress),
+      public_address: result.magic.userMetadata.publicAddress || null,
+      login_provider: result.oauth.provider || null,
     };
   };
 
@@ -31,15 +31,9 @@ export default function Callback() {
       try {
         const user = await formatUserData();
         await syncUserToSupabase(user);
-        localStorage.setItem("user", JSON.stringify(user));
         navigate("/");
       } catch (error: any) {
-        if (
-          error?.code === -32600 &&
-          error?.message?.includes(
-            "Skipped remaining OAuth verification steps."
-          )
-        ) {
+        if (error?.code === -32600) {
           console.warn("Already logged in, skipping redirect handling.");
           await fetchUser();
           navigate("/");
@@ -56,7 +50,4 @@ export default function Callback() {
       <Badge className='animate-[spin_2s_ease_infinite]' size={72} />
     </div>
   );
-}
-function fetchUser() {
-  throw new Error("Function not implemented.");
 }

@@ -1,4 +1,3 @@
-// context/AuthContext.tsx
 import {
   createContext,
   useContext,
@@ -8,16 +7,15 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { magic } from "@/lib/magic";
-import { supabase } from "@/lib/supabaseClient";
 import type { AuthContextType } from "@/types/AuthContextType";
-import type { UserRow } from "@/db/schema/users";
-import { generateAvatar } from "@/utils/Utils";
+import type { User } from "@/types/User";
+import { fetchUserFromSupabase } from "@/services/supabase/userService";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setLoading] = useState(true);
-  const [user, setUser] = useState<UserRow | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   const fetchUser = async () => {
@@ -25,34 +23,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const loggedIn = await magic.user.isLoggedIn();
       if (!loggedIn) {
         setUser(null);
-        localStorage.removeItem("user");
         return;
       }
 
-      const stored = localStorage.getItem("user");
-      if (stored) {
-        setUser(JSON.parse(stored));
-        return;
-      }
+      const userInfo = await magic.user.getInfo();
+      if (!userInfo.publicAddress) throw new Error("No public address.");
 
-      const info = await magic.user.getInfo();
-      const issuer = info.issuer ?? "";
+      const user = await fetchUserFromSupabase(userInfo.publicAddress);
+      if (!user) throw new Error("User not found in Supabase.");
 
-      const formattedUser: UserRow = {
-        id: issuer,
-        name: info.email?.split("@")[0] || "Unknown",
-        email: info.email || "",
-        public_address: info.publicAddress || "",
-        avatar_url: generateAvatar(info.publicAddress ?? "default-avatar"),
-      };
-
-      // Sync user into Supabase
-      await supabase.from("users").upsert(formattedUser);
-
-      setUser(formattedUser);
-      localStorage.setItem("user", JSON.stringify(formattedUser));
+      setUser(user);
     } catch (err) {
-      console.error("Error fetching user:", err);
+      console.error("Fetch user failed", err);
       setUser(null);
     } finally {
       setLoading(false);
@@ -63,11 +45,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       await magic.user.logout();
-      localStorage.removeItem("user");
       setUser(null);
       navigate("/login");
-    } catch (err) {
-      console.error("Error logging out:", err);
+    } catch (error) {
+      console.error("Error logging out:", error);
     } finally {
       setLoading(false);
     }
