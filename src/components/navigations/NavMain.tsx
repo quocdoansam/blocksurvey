@@ -9,6 +9,7 @@ interface NavMainProps {
     content: string;
   }[];
 }
+
 const NavMain = ({ items }: NavMainProps) => {
   return (
     <div className='flex flex-row gap-4 items-center'>
