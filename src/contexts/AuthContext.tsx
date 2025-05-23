@@ -26,6 +26,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        setUser(JSON.parse(stored));
+        return;
+      }
+
       const userInfo = await magic.user.getInfo();
       if (!userInfo.publicAddress) throw new Error("No public address.");
 
@@ -33,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!user) throw new Error("User not found in Supabase.");
 
       setUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
     } catch (err) {
       console.error("Fetch user failed", err);
       setUser(null);
@@ -46,6 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       await magic.user.logout();
       setUser(null);
+      localStorage.removeItem("user");
       navigate("/login");
     } catch (error) {
       console.error("Error logging out:", error);

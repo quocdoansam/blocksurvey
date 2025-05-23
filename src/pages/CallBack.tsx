@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { magic } from "../lib/magic";
-import { Badge } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { syncUserToSupabase } from "@/services/supabase/userService";
 import type { User } from "@/types/User";
 import { generateAvatar } from "@/utils/Utils";
@@ -21,7 +21,7 @@ export default function Callback() {
       email: userInfo.email || null,
       avatar_url:
         userInfo.picture || generateAvatar(userMetadata.publicAddress),
-      public_address: result.magic.userMetadata.publicAddress || null,
+      public_address: userMetadata.publicAddress || null,
       login_provider: result.oauth.provider || null,
     };
   };
@@ -31,6 +31,7 @@ export default function Callback() {
       try {
         const user = await formatUserData();
         await syncUserToSupabase(user);
+        await fetchUser();
         navigate("/");
       } catch (error: any) {
         if (error?.code === -32600) {
@@ -47,7 +48,7 @@ export default function Callback() {
 
   return (
     <div className='min-h-screen flex items-center justify-center'>
-      <Badge className='animate-[spin_2s_ease_infinite]' size={72} />
+      <Loader2 className='animate-spin' size={72} />
     </div>
   );
 }

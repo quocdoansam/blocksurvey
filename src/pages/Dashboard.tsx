@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 
-const Home = () => {
+const Dashboard = () => {
   const { user } = useAuth();
   return (
     <div>
@@ -9,4 +9,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Dashboard;

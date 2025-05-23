@@ -42,7 +42,7 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 1rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -114,7 +114,14 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+body {
+  background-image: linear-gradient(rgb(229 231 235) 1px, transparent 1px), linear-gradient(to right, rgb(229 231 235) 1px, transparent 1px);
+  background-size: 100px 100px;
+  background-color: rgb(249 250 251);
 }
