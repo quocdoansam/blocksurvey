@@ -24,8 +24,9 @@ const Footer = () => {
       ],
     },
   ];
+
   return (
-    <footer className='flex flex-col md:flex-row justify-between items-start py-5 md:py-10 gap-12 md:gap-0'>
+    <footer className='flex flex-col md:flex-row justify-between items-start pb-5 pt-10 md:py-10 gap-6 md:gap-0'>
       <div className='flex items-center'>
         <Logo />
         <h1 className='text-2xl font-bold'>BlockSurvey</h1>

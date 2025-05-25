@@ -13,7 +13,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "../ui/skeleton";
 import { Link } from "react-router-dom";
 import type { JSX } from "react";
-import { LogOut } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
+import { useResponsive } from "@/hooks/useResponsive";
 
 interface NavUserProps {
   items: {
@@ -25,15 +26,25 @@ interface NavUserProps {
 
 export function NavUser({ items }: NavUserProps) {
   const { user, isLoading, logout } = useAuth();
+  const { isMobile } = useResponsive();
 
   if (isLoading) {
     return (
       <div className='flex flex-row gap-2 items-center'>
-        <Skeleton className='w-20 h-9 rounded-xl bg-gray-300' />
-        <Skeleton className='size-9 rounded-full bg-gray-300' />
+        <Skeleton className='w-20 h-9 rounded-xl' />
+        <Skeleton className='size-9 rounded-full' />
       </div>
     );
   }
+
+  if (!user) {
+    return (
+      <Button asChild>
+        <a href='/login'>Login</a>
+      </Button>
+    );
+  }
+
   return (
     <div className='flex flex-row gap-2 items-center'>
       <Button variant={"outline"} className='select-none' asChild>
@@ -41,15 +52,35 @@ export function NavUser({ items }: NavUserProps) {
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Avatar className='size-9 select-none hover:scale-105 transition cursor-pointer'>
-            <AvatarImage src={user?.avatar_url ?? ""} />
-            <AvatarFallback>
-              {user?.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          {isMobile ? (
+            <Button size={"icon"}>
+              <Menu />
+            </Button>
+          ) : (
+            <Avatar className='size-9 select-none hover:scale-105 transition cursor-pointer'>
+              <AvatarImage src={user?.avatar_url ?? ""} />
+              <AvatarFallback>
+                {user?.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className='w-56' align='end'>
-          <DropdownMenuLabel>Hi, {user?.name}</DropdownMenuLabel>
+          <DropdownMenuLabel>
+            {isMobile ? (
+              <div className='flex flex-row gap-2 items-center'>
+                <Avatar>
+                  <AvatarImage src={user?.avatar_url ?? ""} />
+                  <AvatarFallback>
+                    {user?.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span>{user?.name}</span>
+              </div>
+            ) : (
+              <span>Hi, {user?.name}</span>
+            )}
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           {items.map(
             (group, groupIndex) =>

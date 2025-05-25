@@ -1,6 +1,7 @@
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import { Toaster } from "@/components/ui/sonner";
 import { Outlet } from "react-router-dom";
-import Header from "../Header";
-import Footer from "../Footer";
 
 const MainLayout = () => {
   return (
@@ -8,6 +9,7 @@ const MainLayout = () => {
       <Header />
       <main className='flex-1 overflow-y-auto mt-5 md:mt-10'>
         <Outlet />
+        <Toaster />
       </main>
       <Footer />
     </div>
