@@ -1,20 +1,10 @@
-import type { Answer } from "./Answer";
+import type { SurveyStats } from "./SurveyStats";
 
 export interface Survey {
-  id?: string;
-  creator_id: string;
-  creator_wallet: string;
+  id: string;
   title: string;
-  description: string | null;
-  answers: Answer[];
-  allow_other_option: boolean;
-  allow_multiple_choice: boolean;
-  allow_comments: boolean;
-  start_time: Date;
-  end_time: Date | null;
-  status: SurveyStatus;
-  created_at: Date;
-  hash?: string;
+  start_time: string;
+  end_time: string | null;
+  survey_stats: SurveyStats;
+  created_at: string;
 }
-
-export type SurveyStatus = "open" | "closed" | "archived";

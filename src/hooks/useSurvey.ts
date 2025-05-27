@@ -1,48 +1,43 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabaseClient";
-import type { SurveyWithService } from "@/types/SurveyWithService";
+import { getSurveys } from "@/services/supabase/rpc";
+import type { Survey } from "@/types/Survey";
 import { useEffect, useState, useCallback } from "react";
 
 export const useSurvey = () => {
-  const [surveys, setSurveys] = useState<SurveyWithService[]>([]);
+  const [surveys, setSurveys] = useState<Survey[]>([]);
   const [isSurveyLoading, setSurveyLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const { user, isLoading: isAuthLoading } = useAuth();
+  const userId = user?.id;
 
   const fetchSurveys = useCallback(async () => {
-    if (!user?.id) {
+    if (!userId) {
       setSurveys([]);
       setSurveyLoading(false);
       return;
     }
 
-    setSurveyLoading(true);
-    setError(null);
+    try {
+      setSurveyLoading(true);
+      setError(null);
 
-    const { data, error } = await supabase
-      .from("surveys")
-      .select(
-        `id, title, end_time, status, created_at, survey_services (participants, updated_at)`
-      )
-      .eq("creator_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Failed to fetch surveys:", error);
-      setError(error.message);
+      const surveys = await getSurveys(userId);
+      console.log("Surveys:", surveys);
+      setSurveys(surveys);
+    } catch (err: any) {
+      console.error("Failed to fetch surveys:", err);
+      setError(err.message ?? "Unknown error");
       setSurveys([]);
-    } else {
-      setSurveys(data as SurveyWithService[]);
+    } finally {
+      setSurveyLoading(false);
     }
-
-    setSurveyLoading(false);
-  }, [user?.id]);
+  }, [userId]);
 
   useEffect(() => {
-    if (!isAuthLoading) {
-      fetchSurveys();
-    }
-  }, [fetchSurveys, isAuthLoading]);
+    if (isAuthLoading || !userId) return;
+    fetchSurveys();
+  }, [fetchSurveys, isAuthLoading, userId]);
 
   return {
     surveys,

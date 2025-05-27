@@ -18,89 +18,77 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
-import { CirclePlus, Info, X } from "lucide-react";
+import { CirclePlus, Info, Loader2, X } from "lucide-react";
 import { Separator } from "../ui/separator";
 import { Switch } from "../ui/switch";
-import getBlockSurveyContract from "@/lib/contract";
-import { getSigner } from "@/lib/magic";
-import { ethers, randomBytes, uuidV4 } from "ethers";
 import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
-import type { Survey } from "@/types/Survey";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabaseClient";
-import type { Answer } from "@/types/Answer";
+import { toast } from "sonner";
+import { useCreateSurveyForm } from "@/hooks/useCreateSurveyForm";
+import { generateUUID } from "@/utils/Utils";
+import type { SurveyWithCreate } from "@/types/SurveyWithCreate";
+import { createSurvey } from "@/services/supabase/rpc";
 
 const CreateSurvey = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [answers, setAnswers] = useState<Answer[]>([
-    { id: uuidV4(randomBytes(16)), content: "" },
-    { id: uuidV4(randomBytes(16)), content: "" },
-  ]);
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [allowMultiplechoice, setAllowMultipleChoice] = useState(false);
-  const [allowComment, setAllowComment] = useState(false);
-  const [allowOtherOption, setAllowOtherOption] = useState(false);
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    options,
+    startTime,
+    setStartTime,
+    endTime,
+    setEndTime,
+    allowComment,
+    setAllowComment,
+    allowMultiplechoice,
+    setAllowMultipleChoice,
+    allowOtherAnswer,
+    setAllowOtherAnswer,
+    handleAddAnswer,
+    handleAnswerChange,
+    handleRemoveAnswer,
+  } = useCreateSurveyForm();
+
   const { user } = useAuth();
-
-  const handleAnswerChange = (index: number, value: string) => {
-    const newAnswers = [...answers];
-    newAnswers[index] = { ...newAnswers[index], content: value };
-    setAnswers(newAnswers);
-  };
-
-  const handleAddAnswer = () => {
-    setAnswers([...answers, { id: uuidV4(randomBytes(16)), content: "" }]);
-  };
-
-  const handleRemoveOption = (index: number) => {
-    if (answers.length <= 2) return;
-    const newOptions = answers.filter((_, i) => i !== index);
-    setAnswers(newOptions);
-  };
+  const [isLoading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       if (!user) {
-        console.log("Not logged in.");
+        toast("You have to login to start creating a new survey.");
         return;
       }
 
-      const signer = getSigner();
-      const creatorWallet = await signer.getAddress();
-
-      const surveyData: Survey = {
-        id: uuidV4(randomBytes(16)),
+      const surveyData: SurveyWithCreate = {
+        id: generateUUID(),
         creator_id: user.id ?? "",
-        creator_wallet: creatorWallet,
         title: title,
         description: description,
-        answers: answers,
-        allow_other_option: allowOtherOption,
-        allow_multiple_choice: allowMultiplechoice,
-        allow_comments: allowComment,
-        start_time: new Date(startTime),
-        end_time: endTime ? new Date(endTime) : null,
-        status: "open",
-        created_at: new Date(),
+        options: options,
+        start_time: startTime,
+        end_time: endTime ? endTime : null,
+        created_at: new Date().toISOString(),
+        survey_stats: {
+          status: "open",
+          allow_comments: allowComment,
+          allow_multiple_option: allowMultiplechoice,
+          allow_other_option: allowOtherAnswer,
+        },
       };
 
-      const serialized = JSON.stringify(surveyData);
-      const hash = ethers.keccak256(ethers.toUtf8Bytes(serialized));
-      console.log("HASH: ", hash);
-
-      const { error } = await supabase
-        .from("surveys")
-        .insert({ ...surveyData, hash });
-      if (error) console.error("Insert failed:", error);
-
-      const contract = getBlockSurveyContract(getSigner());
-      const tx = await contract.submitSurveyHash(hash);
-      await tx.wait();
+      const submitted = await createSurvey(surveyData);
+      if (!submitted) {
+        toast("Deploy failed. Please try again later.");
+        return;
+      }
+      toast("Your survey hasbeen deployed.");
     } catch (error) {
       console.error(error);
     }
+    setLoading(false);
   };
 
   return (
@@ -164,22 +152,22 @@ const CreateSurvey = () => {
             <div className='flex flex-col space-y-1.5'>
               <Label htmlFor='answers'>Answer Options</Label>
               <div className='grid grid-cols-1 gap-2'>
-                {answers.map((answer, index) => (
+                {options.map((option, index) => (
                   <div className='flex gap-2' key={index}>
                     <Input
                       placeholder={`Option ${index + 1}`}
-                      value={answer.content}
+                      value={option.content}
                       onChange={(e) =>
                         handleAnswerChange(index, e.target.value)
                       }
                       className='grow'
                     />
-                    {answers.length > 2 && (
+                    {options.length > 2 && (
                       <Button
                         size={"icon"}
                         variant={"destructive"}
                         type='button'
-                        onClick={() => handleRemoveOption(index)}
+                        onClick={() => handleRemoveAnswer(index)}
                       >
                         <X />
                       </Button>
@@ -254,8 +242,8 @@ const CreateSurvey = () => {
                 </Label>
                 <Switch
                   id='multiple-choice'
-                  checked={allowOtherOption}
-                  onCheckedChange={setAllowOtherOption}
+                  checked={allowOtherAnswer}
+                  onCheckedChange={setAllowOtherAnswer}
                 />
               </div>
             </div>
@@ -264,7 +252,9 @@ const CreateSurvey = () => {
       </CardContent>
       <CardFooter className='flex justify-between'>
         <Button variant='outline'>Preview</Button>
-        <Button onSubmit={handleSubmit}>Deploy</Button>
+        <Button onClick={handleSubmit}>
+          {isLoading ? <Loader2 className='animate-spin' /> : "Deploy"}
+        </Button>
       </CardFooter>
     </Card>
   );

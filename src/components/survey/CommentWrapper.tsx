@@ -12,7 +12,7 @@ import { Separator } from "../ui/separator";
 
 const CommentWrapper = () => {
   return (
-    <Card className='w-full max-w-lg'>
+    <Card className='w-full md:max-w-lg'>
       <CardHeader>
         <CardTitle>Comments (Coming soon)</CardTitle>
       </CardHeader>

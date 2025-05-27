@@ -15,7 +15,10 @@ export const routes = [
       { path: "", element: <Dashboard /> },
       { path: "create", element: <Create /> },
       { path: "settings", element: <Setting /> },
-      { path: "surveys/:id", element: <Details /> },
+      {
+        path: "surveys/:id",
+        element: <Details />,
+      },
     ],
   },
   { path: "/login", element: <Login /> },

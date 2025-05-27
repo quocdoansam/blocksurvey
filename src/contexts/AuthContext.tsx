@@ -8,8 +8,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { magic } from "@/lib/magic";
 import type { AuthContextType } from "@/types/AuthContextType";
-import type { User } from "@/types/User";
 import { fetchUserFromSupabase } from "@/services/supabase/userService";
+import type { User } from "@/types/User";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -32,11 +32,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
 
-      const userInfo = await magic.user.getInfo();
-      if (!userInfo.publicAddress) throw new Error("No public address.");
+      const userMetadata = await magic.user.getInfo();
+      if (!userMetadata.email) throw new Error("The email is missing.");
 
-      const user = await fetchUserFromSupabase(userInfo.publicAddress);
-      if (!user) throw new Error("User not found in Supabase.");
+      const user = await fetchUserFromSupabase(userMetadata.email);
+      if (!user) throw new Error("User not found.");
 
       setUser(user);
       localStorage.setItem("user", JSON.stringify(user));

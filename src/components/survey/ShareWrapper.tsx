@@ -18,7 +18,7 @@ import { Label } from "../ui/label";
 
 const ShareWrapper = () => {
   return (
-    <Card className='w-full max-w-lg'>
+    <Card className='w-full md:max-w-lg'>
       <CardHeader>
         <CardTitle>Share this survey</CardTitle>
       </CardHeader>

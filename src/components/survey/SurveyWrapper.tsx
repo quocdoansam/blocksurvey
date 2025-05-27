@@ -1,12 +1,13 @@
+import type { Survey } from "@/types/Survey";
 import SurveyCard from "./SurveyCard";
-import type { SurveyWithService } from "@/types/SurveyWithService";
 import SurveyFilter from "./SurveyFilter";
 
 interface SurveyWrapperProps {
-  surveys: SurveyWithService[];
+  surveys: Survey[];
 }
 
 const SurveyWrapper = ({ surveys }: SurveyWrapperProps) => {
+  console.log(surveys);
   return (
     <>
       <SurveyFilter />

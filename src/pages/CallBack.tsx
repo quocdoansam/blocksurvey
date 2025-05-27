@@ -2,10 +2,9 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { magic } from "../lib/magic";
 import { Loader2 } from "lucide-react";
-import { syncUserToSupabase } from "@/services/supabase/userService";
-import type { User } from "@/types/User";
-import { generateAvatar } from "@/utils/Utils";
+import { createUser } from "@/services/supabase/userService";
 import { useAuth } from "@/contexts/AuthContext";
+import type { User } from "@/types/User";
 
 export default function Callback() {
   const navigate = useNavigate();
@@ -16,13 +15,20 @@ export default function Callback() {
     const userInfo = result.oauth.userInfo;
     const userMetadata = result.magic.userMetadata;
 
+    if (
+      !userInfo.name ||
+      !userInfo.email ||
+      !userInfo.picture ||
+      !userMetadata.publicAddress
+    ) {
+      throw new Error("Missing some field.");
+    }
+
     return {
-      name: userInfo.name || "Unknown",
-      email: userInfo.email || null,
-      avatar_url:
-        userInfo.picture || generateAvatar(userMetadata.publicAddress),
-      public_address: userMetadata.publicAddress || null,
-      login_provider: result.oauth.provider || null,
+      name: userInfo.name,
+      email: userInfo.email,
+      avatar_url: userInfo.picture,
+      wallet_address: userMetadata.publicAddress,
     };
   };
 
@@ -30,7 +36,8 @@ export default function Callback() {
     (async () => {
       try {
         const user = await formatUserData();
-        await syncUserToSupabase(user);
+        console.log("User: ", user);
+        await createUser(user);
         await fetchUser();
         navigate("/");
       } catch (error: any) {

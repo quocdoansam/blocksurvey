@@ -1,0 +1,1 @@
+export type SurveyStatus = 'open' | 'closed' | 'draft';

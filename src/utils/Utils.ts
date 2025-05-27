@@ -1,16 +1,15 @@
-import { uuidV4, randomBytes } from "ethers";
+import { uuidV4, randomBytes, ethers } from "ethers";
 
 /**
  * Generate avatar with dicebear.
  * @param seed
  */
 export const generateAvatar = (seed?: string | null) => {
-  return `https://api.dicebear.com/6.x/identicon/svg?seed=${
-    seed ? seed : "block-survey"
-  }`;
+  return `https://api.dicebear.com/6.x/identicon/svg?seed=${seed ? seed : "block-survey"
+    }`;
 };
 
-export const generateUUID = uuidV4(randomBytes(16));
+export const generateUUID = () => { return uuidV4(randomBytes(16)) };
 
 export const getTimeLeftString = (endTime?: string | Date): string => {
   if (!endTime) return "No deadline";
@@ -37,3 +36,7 @@ export const formatDate = (date?: Date | string) => {
   if (!date) return "N/A";
   return new Date(date).toLocaleDateString();
 };
+
+export const startHash = (content: string) => {
+  return ethers.keccak256(ethers.toUtf8Bytes(content));
+}

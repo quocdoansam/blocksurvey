@@ -1,10 +1,13 @@
+import type { UserStats } from "./UserStats";
+
 export interface User {
   id?: string;
   name: string;
-  email: string | null;
-  avatar_url: string | null;
-  public_address: string | null;
+  email: string;
+  avatar_url: string;
+  wallet_address: string;
   is_admin?: boolean;
-  login_provider: string;
+  user_stats?: UserStats;
   created_at?: string;
+  updated_at?: string;
 }

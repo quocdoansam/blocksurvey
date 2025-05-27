@@ -1,11 +1,18 @@
 import { Badge } from "../ui/badge";
 import { formatDate, getTimeLeftString } from "@/utils/Utils";
-import type { SurveyWithService } from "@/types/SurveyWithService";
-import { ClockAlert, UsersRound } from "lucide-react";
+import {
+  BadgePlus,
+  ClockAlert,
+  MessageCircle,
+  Settings,
+  SquareStack,
+  UsersRound,
+} from "lucide-react";
+import type { Survey } from "@/types/Survey";
 import { Link } from "react-router-dom";
 
 interface SurveyCardProps {
-  survey: SurveyWithService;
+  survey: Survey;
 }
 
 const SurveyCard = ({ survey }: SurveyCardProps) => {
@@ -14,20 +21,20 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
       <div className='p-4 border rounded-xl bg-card shadow-md hover:shadow-xl transition space-y-2 cursor-pointer active:scale-98'>
         <h1 className='text-xl font-bold'>{survey.title}</h1>
         <p className='text-sm text-muted-foreground'>
-          {formatDate(survey.created_at)}
+          Created at {formatDate(survey.created_at)}
         </p>
 
         <div className='flex justify-between items-center text-sm'>
-          <span className='text-muted-foreground flex items-center gap-1'>
+          <span className='text-muted-foreground flex items-center gap-2'>
             <UsersRound size={16} /> Participants
           </span>
           <Badge variant='default'>
-            {survey.survey_services?.[0]?.participants ?? 0}
+            {survey.survey_stats.participants ?? 0}
           </Badge>
         </div>
 
         <div className='flex justify-between items-center text-sm'>
-          <span className='text-muted-foreground flex gap-2'>
+          <span className='text-muted-foreground flex gap-2  items-center'>
             <ClockAlert size={16} /> Deadline
           </span>
           <Badge variant='default'>
@@ -36,10 +43,36 @@ const SurveyCard = ({ survey }: SurveyCardProps) => {
               : "No Deadline"}
           </Badge>
         </div>
-
+        <div className='flex justify-between items-center text-sm'>
+          <span className='text-muted-foreground flex gap-2 items-center'>
+            <Settings size={16} />
+            Settings
+          </span>
+          <div className='flex gap-2 h-[22px]'>
+            {survey.survey_stats.allow_multiple_option && (
+              <Badge variant='default'>
+                <SquareStack />
+              </Badge>
+            )}
+            {survey.survey_stats.allow_comments && (
+              <Badge variant='default'>
+                <MessageCircle />
+              </Badge>
+            )}
+            {survey.survey_stats.allow_other_option && (
+              <Badge variant='default'>
+                <BadgePlus />
+              </Badge>
+            )}
+          </div>
+        </div>
         <div className='flex justify-end'>
-          <Badge variant={survey.status === "open" ? "default" : "destructive"}>
-            {survey.status}
+          <Badge
+            variant={
+              survey.survey_stats.status === "open" ? "default" : "destructive"
+            }
+          >
+            {survey.survey_stats.status}
           </Badge>
         </div>
       </div>
