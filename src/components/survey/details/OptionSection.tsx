@@ -12,6 +12,8 @@ interface OptionSectionProps {
   setSelectedOptionId: (value: string) => void;
   submittedOptionId?: string;
   submited: boolean;
+  expired: boolean;
+  notStarted: boolean;
 }
 
 const OptionSection = ({
@@ -21,6 +23,8 @@ const OptionSection = ({
   setSelectedOptionId,
   submittedOptionId,
   submited,
+  expired,
+  notStarted,
 }: OptionSectionProps) => {
   return (
     <div>
@@ -31,7 +35,7 @@ const OptionSection = ({
             <RadioGroup
               value={selectedOptionId}
               onValueChange={setSelectedOptionId}
-              disabled={submited}
+              disabled={submited || expired || notStarted}
               defaultValue={submittedOptionId}
             >
               {options.map((option) => (
@@ -52,7 +56,10 @@ const OptionSection = ({
                 </div>
               ))}
             </RadioGroup>
-            {survey_stats.allow_other_option && !submited && <AddOtherOption />}
+            {survey_stats.allow_other_option &&
+              !submited &&
+              !expired &&
+              !notStarted && <AddOtherOption />}
           </div>
         </>
       )}

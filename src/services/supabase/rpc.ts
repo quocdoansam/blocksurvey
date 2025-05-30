@@ -42,6 +42,7 @@ export const getSurveysDetails = async (surveyId: string) => {
 };
 
 export const createSurvey = async (surveyData: SurveyWithCreate) => {
+  console.log(surveyData);
   let { data, error } = await supabase.rpc("create_survey", {
     p_created_at: surveyData.created_at,
     p_creator_id: surveyData.creator_id,
@@ -72,4 +73,29 @@ export const submitResponse = async (
 
   if (error) console.error(error);
   else console.log(data);
+};
+
+export const insertOtherSurvey = async (
+  id: string,
+  surveyId: string,
+  content: string,
+  creatorId: string
+) => {
+  let { data, error } = await supabase.rpc("insert_survey_option", {
+    p_id: id,
+    p_survey_id: surveyId,
+    p_content: content,
+    p_creator_id: creatorId,
+  });
+  if (error) throw new Error(error.message);
+  else console.log(data);
+};
+
+export const searchByTitle = async (searchTerm: string) => {
+  const { data, error } = await supabase.rpc("search_surveys_by_title", {
+    search_term: searchTerm,
+  });
+
+  if (error) console.error(error);
+  return data as Survey[];
 };

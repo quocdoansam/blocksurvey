@@ -7,10 +7,9 @@ interface SurveyWrapperProps {
 }
 
 const SurveyWrapper = ({ surveys }: SurveyWrapperProps) => {
-  console.log(surveys);
   return (
     <>
-      <SurveyFilter />
+      {/* <SurveyFilter /> */}
       <div className='columns-1 sm:columns-2 lg:columns-3'>
         {surveys.map((survey, index) => (
           <div key={index} className='break-inside-avoid mb-4'>

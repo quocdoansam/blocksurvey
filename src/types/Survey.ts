@@ -5,6 +5,6 @@ export interface Survey {
   title: string;
   start_time: string;
   end_time: string | null;
-  survey_stats: SurveyStats;
+  survey_stats?: SurveyStats;
   created_at: string;
 }

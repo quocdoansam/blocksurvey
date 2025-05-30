@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
@@ -8,6 +8,7 @@ import CommentWrapper from "./CommentWrapper";
 import { getSurveysDetails } from "@/services/supabase/rpc";
 import type { SurveyDetails } from "@/types/SurveyDetails";
 import SurveyCardDetails from "./details/SurveyCardDetails";
+import { Button } from "../ui/button";
 
 const Details = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,11 +56,14 @@ const Details = () => {
 
   if (!survey)
     return (
-      <div className='flex justify-center max-w-lg'>
-        <Alert>
-          <AlertTitle>404</AlertTitle>
-          <AlertDescription>No survey found.</AlertDescription>
-        </Alert>
+      <div className='flex items-center flex-col'>
+        <div className='flex gap-2 text-xl font-bold'>
+          <h1>404</h1>
+          <span>NOT FOUND!</span>
+        </div>
+        <Button variant={"link"} asChild>
+          <Link to={"/"}>Redirect to dashboard</Link>
+        </Button>
       </div>
     );
 

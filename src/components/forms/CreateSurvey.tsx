@@ -10,13 +10,6 @@ import {
 } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { CirclePlus, Info, Loader2, X } from "lucide-react";
 import { Separator } from "../ui/separator";
@@ -28,6 +21,8 @@ import { useCreateSurveyForm } from "@/hooks/useCreateSurveyForm";
 import { generateUUID } from "@/utils/Utils";
 import type { SurveyWithCreate } from "@/types/SurveyWithCreate";
 import { createSurvey } from "@/services/supabase/rpc";
+import { useNavigate } from "react-router-dom";
+import { createSurveyOnChain } from "@/services/survey/surveyService";
 
 const CreateSurvey = () => {
   const {
@@ -53,6 +48,7 @@ const CreateSurvey = () => {
 
   const { user } = useAuth();
   const [isLoading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -84,7 +80,16 @@ const CreateSurvey = () => {
         toast("Deploy failed. Please try again later.");
         return;
       }
+
+      await createSurveyOnChain({
+        id: surveyData.id,
+        title: surveyData.title,
+        end_time: surveyData.end_time,
+        start_time: surveyData.start_time,
+        created_at: surveyData.created_at,
+      });
       toast("Your survey hasbeen deployed.");
+      navigate(`/surveys/${submitted}`);
     } catch (error) {
       console.error(error);
     }
@@ -119,38 +124,14 @@ const CreateSurvey = () => {
               />
               <Alert>
                 <Info />
-                <AlertTitle>Note</AlertTitle>
+                <AlertTitle>Hey!</AlertTitle>
                 <AlertDescription>
                   Description is not required, ignoring it if not necessary.
                 </AlertDescription>
               </Alert>
             </div>
-            <div className='flex flex-col space-y-1.5 w-full'>
-              <Label htmlFor='survey-type'>Survey type</Label>
-              <Select>
-                <SelectTrigger id='survey-type' className='w-full'>
-                  <SelectValue placeholder='Select' />
-                </SelectTrigger>
-                <SelectContent position='popper' className='w-full'>
-                  <SelectItem value='multiple'>Multiple choice</SelectItem>
-                  <SelectItem value='meeting'>Meeting Survey</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className='flex flex-col space-y-1.5 w-full'>
-              <Label htmlFor='survey-type'>Survey status</Label>
-              <Select>
-                <SelectTrigger id='survey-type' className='w-full'>
-                  <SelectValue placeholder='Select' />
-                </SelectTrigger>
-                <SelectContent position='popper' className='w-full'>
-                  <SelectItem value='multiple'>Multiple choice</SelectItem>
-                  <SelectItem value='meeting'>Meeting Survey</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div className='flex flex-col space-y-1.5'>
-              <Label htmlFor='answers'>Answer Options</Label>
+              <Label htmlFor='answers'>Answer options</Label>
               <div className='grid grid-cols-1 gap-2'>
                 {options.map((option, index) => (
                   <div className='flex gap-2' key={index}>
@@ -208,7 +189,7 @@ const CreateSurvey = () => {
               </div>
               <Alert>
                 <Info />
-                <AlertTitle>Note</AlertTitle>
+                <AlertTitle>Hey!</AlertTitle>
                 <AlertDescription>
                   If you want this survey to never end, ignoring the end time.
                 </AlertDescription>
@@ -216,7 +197,7 @@ const CreateSurvey = () => {
             </div>
             <Separator />
             <div className='grid grid-cols-1 gap-2'>
-              <div className='flex items-center space-x-2'>
+              {/* <div className='flex items-center space-x-2'>
                 <Label htmlFor='multiple-choice' className='w-full'>
                   Allow selection of multiple options
                 </Label>
@@ -225,7 +206,7 @@ const CreateSurvey = () => {
                   checked={allowMultiplechoice}
                   onCheckedChange={setAllowMultipleChoice}
                 />
-              </div>
+              </div> */}
               <div className='flex items-center space-x-2'>
                 <Label htmlFor='multiple-choice' className='w-full'>
                   Allow comments
@@ -250,8 +231,8 @@ const CreateSurvey = () => {
           </div>
         </form>
       </CardContent>
-      <CardFooter className='flex justify-between'>
-        <Button variant='outline'>Preview</Button>
+      <CardFooter className='flex justify-end'>
+        {/* <Button variant='outline'>Preview</Button> */}
         <Button onClick={handleSubmit}>
           {isLoading ? <Loader2 className='animate-spin' /> : "Deploy"}
         </Button>

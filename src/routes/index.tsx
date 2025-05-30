@@ -6,11 +6,16 @@ import { Create } from "@/pages/surveys/Create";
 import Setting from "@/pages/Setting";
 import Details from "@/components/survey/Details";
 import MainLayout from "@/layouts/MainLayout";
+import RequireAuth from "@/components/RequireAuth";
 
 export const routes = [
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <RequireAuth>
+        <MainLayout />
+      </RequireAuth>
+    ),
     children: [
       { path: "", element: <Dashboard /> },
       { path: "create", element: <Create /> },

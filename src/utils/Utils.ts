@@ -5,11 +5,14 @@ import { uuidV4, randomBytes, ethers } from "ethers";
  * @param seed
  */
 export const generateAvatar = (seed?: string | null) => {
-  return `https://api.dicebear.com/6.x/identicon/svg?seed=${seed ? seed : "block-survey"
-    }`;
+  return `https://api.dicebear.com/6.x/identicon/svg?seed=${
+    seed ? seed : "block-survey"
+  }`;
 };
 
-export const generateUUID = () => { return uuidV4(randomBytes(16)) };
+export const generateUUID = () => {
+  return uuidV4(randomBytes(16));
+};
 
 export const getTimeLeftString = (endTime?: string | Date): string => {
   if (!endTime) return "No deadline";
@@ -34,9 +37,16 @@ export const getTimeLeftString = (endTime?: string | Date): string => {
 
 export const formatDate = (date?: Date | string) => {
   if (!date) return "N/A";
-  return new Date(date).toLocaleDateString();
+  return new Date(date).toLocaleString("vi-VN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
 };
 
 export const startHash = (content: string) => {
   return ethers.keccak256(ethers.toUtf8Bytes(content));
-}
+};

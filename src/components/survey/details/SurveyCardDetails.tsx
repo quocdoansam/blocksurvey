@@ -18,6 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Creator from "./Creator";
 import OptionSection from "./OptionSection";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 
 interface SurveyCardDetailsProps {
   survey: SurveyDetails;
@@ -30,19 +31,30 @@ const SurveyCardDetails = ({ survey }: SurveyCardDetailsProps) => {
   const { isInprocess, submited, setSubmited, handleSubmit, error } =
     useSubmitResponse();
 
+  const [isExpired, setExpired] = useState(false);
+  const [isNotStarted, setNotStarted] = useState(false);
+
   const handleClick = () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      toast("You must log in to be able to conduct a survey");
+      return;
+    }
 
     handleSubmit({
       surveyId: survey.id,
       optionId: selectedOptionId,
       respondentId: user.id,
     });
+    if (
+      survey.survey_stats &&
+      typeof survey.survey_stats.participants === "number"
+    ) {
+      survey.survey_stats.participants += 1;
+    }
   };
 
   useEffect(() => {
     if (!user) return;
-    console.log(user.id);
     if (survey?.survey_responses) {
       const found = survey.survey_responses.find(
         (sRes) => sRes.respondent_id === user?.id
@@ -53,13 +65,25 @@ const SurveyCardDetails = ({ survey }: SurveyCardDetailsProps) => {
         setSubmittedOptionId(found.option_id);
       }
     }
+    if (survey.end_time) {
+      if (new Date(survey.end_time).getTime() < Date.now()) {
+        setExpired(true);
+      }
+    }
+    if (survey.start_time) {
+      if (new Date(survey.start_time).getTime() > Date.now()) {
+        setNotStarted(true);
+      }
+    }
   }, [survey, user]);
 
   return (
     <Card className='w-full'>
       <CardHeader>
         <CardTitle>{survey.title}</CardTitle>
-        <CardDescription>{survey.description}</CardDescription>
+        <CardDescription className='wrap-break-word'>
+          {survey.description}
+        </CardDescription>
       </CardHeader>
       <Separator />
       <CardContent className='space-y-4'>
@@ -99,6 +123,8 @@ const SurveyCardDetails = ({ survey }: SurveyCardDetailsProps) => {
             setSelectedOptionId={setSelectedOptionId}
             submittedOptionId={submittedOptionId}
             submited={submited}
+            expired={isExpired}
+            notStarted={isNotStarted}
           />
         )}
         {submited && (
@@ -111,6 +137,18 @@ const SurveyCardDetails = ({ survey }: SurveyCardDetailsProps) => {
           <Alert variant='destructive'>
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        {isExpired && (
+          <Alert variant='destructive'>
+            <AlertTitle>Expired</AlertTitle>
+            <AlertDescription>This election has ended.</AlertDescription>
+          </Alert>
+        )}
+        {isNotStarted && (
+          <Alert variant='destructive'>
+            <AlertTitle>Not Started</AlertTitle>
+            <AlertDescription>This survey has not happened.</AlertDescription>
           </Alert>
         )}
       </CardContent>
